@@ -61,6 +61,7 @@ fi
 # set cloud variant
 if [ -f $LANDSCAPE_CONFIG ]; then
     export CLOUD_VARIANT="$(yaml2json < $LANDSCAPE_CONFIG | jq -r .cloud.variant)"
+    export DNS_TYPE="$(yaml2json < $LANDSCAPE_CONFIG | jq -r .clusters.dns.dns_type)"
     export LANDSCAPE_NAME="$(grep -m 1 -F "domain_name:" "$LANDSCAPE_CONFIG" | awk '{ print $2 }')"
 else
     echo "WARNING: $LANDSCAPE_CONFIG not found! Did you provide $LANDSCAPE_HOME/landscape_config.yaml so that it can be created?"

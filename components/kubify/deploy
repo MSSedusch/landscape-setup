@@ -19,8 +19,8 @@ mkdir -p ${KUBIFY_STATE_PATH}
 echo "Filling template from landscape.yaml ..."
 mako-render base.template > $LANDSCAPE_HOME/terraform.tfvars
 
-echo "Kubify prepare $CLOUD_VARIANT"
-$KUBIFY_REPO_PATH/bin/prepare $CLOUD_VARIANT
+echo "Kubify prepare with cloud variant $CLOUD_VARIANT and dns type $DNS_TYPE"
+$KUBIFY_REPO_PATH/bin/prepare $CLOUD_VARIANT $DNS_TYPE
 
 echo "Kubify apply"
 $KUBIFY_REPO_PATH/bin/apply -y
