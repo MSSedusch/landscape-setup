@@ -31,13 +31,13 @@ dns = {
   domain_name = "${dns["domain_name"]}"
   dns_type = "${dns["dns_type"]}"
   % if "azuredns" == dns["dns_type"]:
-    tenant_id = "${dns["variant_azuredns"]["tenant_id"]}"
-    subscription_id = "${dns["variant_azuredns"]["subscription_id"]}"
-    client_id = "${dns["variant_azuredns"]["client_id"]}"
-    client_secret = "${dns["variant_azuredns"]["client_secret"]}"
-    cloudenv = "${dns["variant_azuredns"]["cloudenv"]}"
-    zone_name = "${dns["variant_azuredns"]["zone_name"]}"
-    resource_group_name = "${dns["variant_azuredns"]["resource_group_name"]}"
+    az_tenant_id = "${dns["variant_azuredns"]["az_tenant_id"]}"
+    az_subscription_id = "${dns["variant_azuredns"]["az_subscription_id"]}"
+    az_client_id = "${dns["variant_azuredns"]["az_client_id"]}"
+    az_client_secret = "${dns["variant_azuredns"]["az_client_secret"]}"
+    az_cloudenv = "${dns["variant_azuredns"]["az_cloudenv"]}"
+    az_zone_name = "${dns["variant_azuredns"]["az_zone_name"]}"
+    az_resource_group_name = "${dns["variant_azuredns"]["az_resource_group_name"]}"
   % endif
 
   % if "route53" == dns["dns_type"]:
