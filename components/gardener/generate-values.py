@@ -59,8 +59,6 @@ values={
       "domain": gardener_config["values"]["controller"]["internalDomain"]["domain"],
       "hostedZoneID": gardener_config["values"]["controller"]["internalDomain"]["hostedZoneID"],
       "credentials": {
-        "accessKeyID": gardener_config["values"]["controller"]["internalDomain"]["access_key"],
-        "secretAccessKey": gardener_config["values"]["controller"]["internalDomain"]["secret_key"]
       }
     },
     "defaultDomains": [],
@@ -86,15 +84,43 @@ values={
   }
 }
 
+if gardener_config["values"]["controller"]["internalDomain"]["provider"] == "aws-route53":
+  values["controller"]["internalDomain"]["credentials"] = {
+    "accessKeyID": gardener_config["values"]["controller"]["internalDomain"]["variant_route53"]["access_key"],
+    "secretAccessKey": gardener_config["values"]["controller"]["internalDomain"]["variant_route53"]["secret_key"]
+  }
+elif gardener_config["values"]["controller"]["internalDomain"]["provider"] == "azure-azuredns":
+  values["controller"]["internalDomain"]["credentials"] = {
+    "client_id": gardener_config["values"]["controller"]["internalDomain"]["variant_azuredns"]["client_id"],
+    "client_secret": gardener_config["values"]["controller"]["internalDomain"]["variant_azuredns"]["client_secret"],
+    "cloudenv": gardener_config["values"]["controller"]["internalDomain"]["variant_azuredns"]["cloudenv"],
+    "subscription_id": gardener_config["values"]["controller"]["internalDomain"]["variant_azuredns"]["subscription_id"],
+    "tenant_id": gardener_config["values"]["controller"]["internalDomain"]["variant_azuredns"]["tenant_id"]
+  }
+
 for domain in gardener_config["values"]["controller"]["defaultDomains"]:
-  values["controller"]["defaultDomains"].append({
+  newDomain = {
     "provider": domain["provider"],
     "domain": domain["domain"],
     "hostedZoneID": domain["hostedZoneID"],
-    "credentials": {
-      "accessKeyID": domain["access_key"],
-      "secretAccessKey": domain["secret_key"]
+    "credentials": {      
     }
-  })
+  }
+
+  if domain["provider"] == "aws-route53":
+    newDomain["credentials"] = {
+      "accessKeyID": domain["variant_route53"]["access_key"],
+      "secretAccessKey": domain["variant_route53"]["secret_key"]
+    }
+  elif domain["provider"] == "azure-azuredns":
+    newDomain["credentials"] = {
+      "client_id": domain["variant_azuredns"]["client_id"],
+      "client_secret": domain["variant_azuredns"]["client_secret"],
+      "cloudenv": domain["variant_azuredns"]["cloudenv"],
+      "subscription_id": domain["variant_azuredns"]["subscription_id"],
+      "tenant_id": domain["variant_azuredns"]["tenant_id"]
+    }
+  
+  values["controller"]["defaultDomains"].append(newDomain)
 
 yaml.safe_dump(values, sys.stdout, indent=2, width=100000, default_style='\"')
