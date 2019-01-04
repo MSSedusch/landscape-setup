@@ -15,7 +15,7 @@
 # limitations under the License.
 
 certmanager_config="$(read_landscape_config '.charts[] | select(.name=="certmanager")')"
-
+dns_provider="$(read_landscape_config '.clusters.dns.provider')"
 # render issuer file
 mako-render ${COMPONENT_TEMPLATE_HOME}/cert-manager-issuer.yaml.tmpl >${COMPONENT_STATE_HOME}/cert-manager-issuer.yaml
 
@@ -38,12 +38,20 @@ kubectl -n kube-system delete secret identity-tls --ignore-not-found
 # patch dashboard and ingress 
 dashboard_issuer=$(kubectl get ingress -n garden  gardener-dashboard-ingress -o jsonpath="{.metadata.annotations.certmanager\.k8s\.io/cluster-issuer}")
 if [ "$dashboard_issuer" != "letsencrypt" ] ; then
-    kubectl -n garden annotate ingress gardener-dashboard-ingress certmanager.k8s.io/cluster-issuer=letsencrypt certmanager.k8s.io/acme-dns01-provider=route53-dns certmanager.k8s.io/acme-challenge-type=dns01
+    if [ "aws-route53" == "$dns_provider" ] ; then
+        kubectl -n garden annotate ingress gardener-dashboard-ingress certmanager.k8s.io/cluster-issuer=letsencrypt certmanager.k8s.io/acme-dns01-provider=route53-dns certmanager.k8s.io/acme-challenge-type=dns01
+    elif [ "azure-azuredns" == "$dns_provider" ] ; then
+        kubectl -n garden annotate ingress gardener-dashboard-ingress certmanager.k8s.io/cluster-issuer=letsencrypt certmanager.k8s.io/acme-dns01-provider=azuredns-dns certmanager.k8s.io/acme-challenge-type=dns01
+    fi
 fi
 
 identity_issuer=$(kubectl get ingress -n kube-system  identity-ingress -o jsonpath="{.metadata.annotations.certmanager\.k8s\.io/cluster-issuer}")
 if [ "$identity_issuer" != "letsencrypt" ] ; then
-    kubectl -n kube-system annotate ingress identity-ingress certmanager.k8s.io/cluster-issuer=letsencrypt certmanager.k8s.io/acme-dns01-provider=route53-dns certmanager.k8s.io/acme-challenge-type=dns01
+    if [ "aws-route53" == "$dns_provider" ] ; then
+        kubectl -n kube-system annotate ingress identity-ingress certmanager.k8s.io/cluster-issuer=letsencrypt certmanager.k8s.io/acme-dns01-provider=route53-dns certmanager.k8s.io/acme-challenge-type=dns01
+    elif [ "azure-azuredns" == "$dns_provider" ] ; then
+        kubectl -n kube-system annotate ingress identity-ingress certmanager.k8s.io/cluster-issuer=letsencrypt certmanager.k8s.io/acme-dns01-provider=azuredns-dns certmanager.k8s.io/acme-challenge-type=dns01
+    fi
 fi
 
 # wait until secrets have been recreated
